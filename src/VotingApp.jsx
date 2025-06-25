@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Vote, TrendingUp, Users, BarChart3, CheckCircle } from 'lucide-react';
+import { Plus, Vote, TrendingUp, Users, BarChart3, CheckCircle, Delete } from 'lucide-react';
 
 const VotingApp = () => {
   const [polls, setPolls] = useState([]);
@@ -98,6 +98,29 @@ const VotingApp = () => {
       console.error('Error fetching poll:', error);
       setError(`Failed to fetch poll details for poll ${pollId}`);
       throw error;
+    }
+  };
+
+  const deletePollById = async (pollId) => {
+    try {
+      const data = await apiCall(`${API_BASE}/delete/${pollId}`);
+      return data;
+    } catch (error) {
+      console.error('Error deleting poll:', error);
+      setError(`Failed to delete the poll ${pollId}`);
+      throw error;
+    }
+  };
+  const handleDeletePoll = async (pollId) => {
+    try {
+      await deletePollById(pollId);
+      setNotification('Poll deleted successfully!');
+      setPolls(polls.filter(poll => poll.id !== pollId));
+      setTimeout(() => setNotification(''), 3000);
+    } catch (error) {
+      console.error('Error deleting poll:', error);
+      setError('Failed to delete poll. Please try again.');
+      setTimeout(() => setError(''), 3000);
     }
   };
 
@@ -454,6 +477,7 @@ const VotingApp = () => {
                     <Users className="w-4 h-4 mr-1" />
                     <span className="text-sm">{totalVotes} votes</span>
                   </div>
+                  <Delete onClick={() => handleDeletePoll(poll.id)}  className='text-cyan-400 cursor-pointer hover:text-red-600'/>
                 </div>
 
                 <h3 className="text-xl font-bold text-gray-700 mb-6">{poll.question}</h3>
